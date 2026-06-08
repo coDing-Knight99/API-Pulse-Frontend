@@ -27,6 +27,18 @@ const getStatusCodePieData = (metrics) => {
 };
 const StatusCodePieChart = ({ data, title }) => {
     data=getStatusCodePieData(data);
+    if(data.length===0)    {
+        return (
+            <section className="rounded-lg border border-[#20202a] bg-[#0b0b12] p-5">
+              <h2 className="mb-4 text-lg font-semibold text-white">
+                {title}
+              </h2>
+              <div className="flex h-72 items-center justify-center text-slate-400">
+                No data available
+              </div>
+            </section>
+          );
+    } 
   return (
     <section className="rounded-lg border border-[#20202a] bg-[#0b0b12] p-5">
       <h2 className="mb-4 text-lg font-semibold text-white">

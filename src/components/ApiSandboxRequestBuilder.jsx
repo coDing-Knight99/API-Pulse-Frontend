@@ -1,4 +1,4 @@
-import { ChevronDown, KeyRound, Plus, Send, Trash2 } from "lucide-react";
+import { ChevronDown, Plus, Send, Trash2 } from "lucide-react";
 
 const methods = ["GET", "POST", "PUT", "PATCH", "DELETE"];
 
@@ -15,9 +15,8 @@ export default function ApiSandboxRequestBuilder({
   setMethod,
   url,
   setUrl,
-  selectedKey,
-  setSelectedKey,
-  apiKeys,
+  queryParams,
+  setQueryParams,
   headers,
   setHeaders,
   body,
@@ -38,6 +37,22 @@ export default function ApiSandboxRequestBuilder({
 
   function removeHeader(index) {
     setHeaders((currentHeaders) => currentHeaders.filter((_, headerIndex) => headerIndex !== index));
+  }
+
+  function updateQueryParam(index, field, value) {
+    setQueryParams((currentParams) =>
+      currentParams.map((param, paramIndex) =>
+        paramIndex === index ? { ...param, [field]: value } : param,
+      ),
+    );
+  }
+
+  function addQueryParam() {
+    setQueryParams((currentParams) => [...currentParams, { key: "", value: "" }]);
+  }
+
+  function removeQueryParam(index) {
+    setQueryParams((currentParams) => currentParams.filter((_, paramIndex) => paramIndex !== index));
   }
 
   return (
@@ -68,32 +83,11 @@ export default function ApiSandboxRequestBuilder({
           <span className="text-sm font-semibold text-slate-300">Request URL</span>
           <input
             value={url}
-            onChange={(event) => setUrl(event.target.value)}
+            onChange={(event) => setUrl(event.target.value.trim())}
             type="text"
             placeholder="https://api.example.com/v1/users"
             className="h-12 w-full rounded-lg border border-[#20202a] bg-[#08080d] px-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-purple-400/70 focus:ring-2 focus:ring-purple-400/10"
           />
-        </label>
-
-        <label className="grid gap-2 xl:w-72">
-          <span className="text-sm font-semibold text-slate-300">API Key</span>
-          <div className="relative">
-            <KeyRound
-              size={17}
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
-            />
-            <select
-              value={selectedKey}
-              onChange={(event) => setSelectedKey(event.target.value)}
-              className="h-12 w-full appearance-none rounded-lg border border-[#20202a] bg-[#08080d] pl-10 pr-4 text-sm text-slate-100 outline-none transition focus:border-purple-400/70 focus:ring-2 focus:ring-purple-400/10"
-            >
-              {apiKeys.map((apiKey) => (
-                <option key={apiKey.value} value={apiKey.value}>
-                  {apiKey.label}
-                </option>
-              ))}
-            </select>
-          </div>
         </label>
 
         <button
@@ -107,6 +101,52 @@ export default function ApiSandboxRequestBuilder({
       </div>
 
       <div className="mt-6 grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <div className="rounded-lg border border-[#20202a] bg-[#08080d] p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold text-white">Query Params</h2>
+              <p className="mt-1 text-xs text-slate-500">Append URL parameters as key-value pairs.</p>
+            </div>
+            <button
+              type="button"
+              onClick={addQueryParam}
+              aria-label="Add query parameter"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#20202a] text-slate-300 transition hover:border-purple-400/40 hover:bg-[#151521] hover:text-white"
+            >
+              <Plus size={16} />
+            </button>
+          </div>
+
+          <div className="mt-4 grid gap-3">
+            {queryParams.map((param, index) => (
+              <div key={index} className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2.25rem]">
+                <input
+                  value={param.key}
+                  onChange={(event) => updateQueryParam(index, "key", event.target.value)}
+                  type="text"
+                  placeholder="Parameter"
+                  className="h-10 rounded-lg border border-[#20202a] bg-[#0b0b12] px-3 text-sm text-slate-100 outline-none placeholder:text-slate-600 focus:border-purple-400/70"
+                />
+                <input
+                  value={param.value}
+                  onChange={(event) => updateQueryParam(index, "value", event.target.value)}
+                  type="text"
+                  placeholder="Value"
+                  className="h-10 rounded-lg border border-[#20202a] bg-[#0b0b12] px-3 text-sm text-slate-100 outline-none placeholder:text-slate-600 focus:border-purple-400/70"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeQueryParam(index)}
+                  aria-label="Remove query parameter"
+                  className="inline-flex h-10 items-center justify-center rounded-lg border border-[#20202a] text-slate-500 transition hover:border-rose-400/40 hover:bg-rose-400/10 hover:text-rose-300"
+                >
+                  <Trash2 size={15} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
         <div className="rounded-lg border border-[#20202a] bg-[#08080d] p-4">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -153,7 +193,7 @@ export default function ApiSandboxRequestBuilder({
           </div>
         </div>
 
-        <label className="grid gap-3 rounded-lg border border-[#20202a] bg-[#08080d] p-4">
+        <label className="grid gap-3 rounded-lg border border-[#20202a] bg-[#08080d] p-4 xl:col-span-2">
           <span>
             <span className="block text-sm font-semibold text-white">JSON Body</span>
             <span className="mt-1 block text-xs text-slate-500">Available for POST, PUT, PATCH, and DELETE requests.</span>

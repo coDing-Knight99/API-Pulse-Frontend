@@ -14,7 +14,7 @@ import {
 import { Link } from "react-router-dom";
 import Loader from "../components/Loader";
 import axios from "axios";
-
+import Navbar from "../components/Navbar";
 const toneClasses = {
   purple: "bg-purple-500/12 text-purple-300 ring-purple-400/25",
   emerald: "bg-emerald-400/10 text-emerald-300 ring-emerald-400/20",
@@ -84,13 +84,14 @@ function KeyCard({ apiKey,revokeKey }) {
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <Link
-            to={`/api-keys/${apiKey._id}/analytics`}
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-purple-400/30 px-3 text-sm font-semibold text-purple-300 transition hover:bg-purple-400/10"
-          >
-            <BarChart3 size={16} />
-            Analytics
-          </Link>
+          {apiKey.isActive && (
+            <Link
+              to={`/api-keys/${apiKey._id}/analytics`}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-purple-400/30 px-3 text-sm font-semibold text-purple-300 transition hover:bg-purple-400/10"
+            >
+              <BarChart3 size={16} />
+              Analytics
+          </Link>)}
 
         {apiKey.isActive && (
           <button
@@ -250,6 +251,7 @@ function GenerateKeyModal({ onClose, setLoader }) {
 function RecentRequests({requests}) {
   return (
     <section className="rounded-lg border border-[#20202a] bg-[#0b0b12] p-6 shadow-2xl shadow-black/10">
+      <Navbar/>
       <div className="flex items-center justify-between gap-4">
         <div>
           <h2 className="text-lg font-semibold text-white">Recent requests</h2>
@@ -354,7 +356,7 @@ export default function ApiKeys() {
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-purple-300">Access control</p>
             <h1 className="mt-2 text-3xl font-bold tracking-tight text-white">API Keys</h1>
-            <p className="mt-1 text-sm text-slate-400">Generate, inspect, and revoke gateway access keys.</p>
+            <p className="mt-1 text-sm text-slate-400">Generate, inspect, and revoke gateway access keys</p>
           </div>
 
           <button

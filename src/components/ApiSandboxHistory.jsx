@@ -26,8 +26,6 @@ export default function ApiSandboxHistory({ items, onSelect }) {
               <th className="py-3 pr-4 font-semibold">Time</th>
               <th className="px-4 py-3 font-semibold">Method</th>
               <th className="px-4 py-3 font-semibold">Endpoint</th>
-              <th className="px-4 py-3 font-semibold">Status</th>
-              <th className="py-3 pl-4 font-semibold">Latency</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#20202a] text-slate-300">
@@ -37,23 +35,13 @@ export default function ApiSandboxHistory({ items, onSelect }) {
                 onClick={() => onSelect(item)}
                 className="cursor-pointer transition hover:bg-[#101018]"
               >
-                <td className="py-3 pr-4 text-slate-500">{item.time}</td>
+                <td className="py-3 pr-4 text-slate-500">{(new Date(item.updatedAt)).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}</td>
                 <td className="px-4 py-3">
                   <span className={`rounded-lg px-2 py-1 text-xs font-bold ${methodTone[item.method]}`}>
                     {item.method}
                   </span>
                 </td>
                 <td className="max-w-md truncate px-4 py-3 font-medium text-slate-200">{item.url}</td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`rounded-lg px-2 py-1 text-xs font-semibold ${
-                      item.status >= 400 ? "bg-amber-400/10 text-amber-300" : "bg-emerald-400/10 text-emerald-300"
-                    }`}
-                  >
-                    {item.status}
-                  </span>
-                </td>
-                <td className="py-3 pl-4">{item.latency} ms</td>
               </tr>
             ))}
           </tbody>

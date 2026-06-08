@@ -7,8 +7,11 @@ import {
   KeyRound,
   ShieldAlert,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import Loader from "../components/Loader";
+import Navbar from "../components/Navbar";
+import axios from "axios";
 import {
   Area,
   AreaChart,
@@ -66,114 +69,6 @@ const chartTooltipItemStyle = {
   fontWeight: 600,
 };
 
-const sampleKeyAnalytics = {
-  key: {
-    name: "Production Gateway Key",
-    tier: "Pro",
-    status: "Active",
-    prefix: "apip_live_7K9F",
-    createdAt: "2026-05-17T10:30:00.000Z",
-  },
-  metrics: {
-    requests: 18420,
-    errors: 326,
-    avglatency: 142.74,
-    rateLimited: 91,
-    "statusCode:200": 15210,
-    "statusCode:201": 1824,
-    "statusCode:301": 169,
-    "statusCode:400": 211,
-    "statusCode:401": 82,
-    "statusCode:429": 91,
-    "statusCode:500": 31,
-  },
-  hourlyRequests: [
-    { hour: 0, requests: 480 },
-    { hour: 3, requests: 370 },
-    { hour: 6, requests: 620 },
-    { hour: 9, requests: 1380 },
-    { hour: 12, requests: 1760 },
-    { hour: 15, requests: 2140 },
-    { hour: 18, requests: 1880 },
-    { hour: 21, requests: 970 },
-  ],
-  hourlyLatency: [
-    { hour: 0, latency: 118 },
-    { hour: 3, latency: 126 },
-    { hour: 6, latency: 132 },
-    { hour: 9, latency: 148 },
-    { hour: 12, latency: 161 },
-    { hour: 15, latency: 154 },
-    { hour: 18, latency: 139 },
-    { hour: 21, latency: 128 },
-  ],
-  hourlyErrors: [
-    { hour: 0, errors: 8 },
-    { hour: 3, errors: 5 },
-    { hour: 6, errors: 11 },
-    { hour: 9, errors: 34 },
-    { hour: 12, errors: 48 },
-    { hour: 15, errors: 55 },
-    { hour: 18, errors: 42 },
-    { hour: 21, errors: 17 },
-  ],
-  dailyRequests: [
-    { day: "Mon", requests: 2140 },
-    { day: "Tue", requests: 2380 },
-    { day: "Wed", requests: 2610 },
-    { day: "Thu", requests: 2490 },
-    { day: "Fri", requests: 2860 },
-    { day: "Sat", requests: 1780 },
-    { day: "Sun", requests: 1510 },
-  ],
-  dailyErrors: [
-    { day: "Mon", errors: 34 },
-    { day: "Tue", errors: 41 },
-    { day: "Wed", errors: 38 },
-    { day: "Thu", errors: 46 },
-    { day: "Fri", errors: 57 },
-    { day: "Sat", errors: 28 },
-    { day: "Sun", errors: 21 },
-  ],
-  logs: [
-    {
-      id: "req-1",
-      timestamp: "2026-06-05T09:18:00.000Z",
-      method: "GET",
-      path: "/v1/orders",
-      statusCode: 200,
-      responseTime: "124 ms",
-      ip: "103.48.12.44",
-    },
-    {
-      id: "req-2",
-      timestamp: "2026-06-05T09:14:00.000Z",
-      method: "POST",
-      path: "/v1/payments",
-      statusCode: 201,
-      responseTime: "188 ms",
-      ip: "103.48.12.45",
-    },
-    {
-      id: "req-3",
-      timestamp: "2026-06-05T09:08:00.000Z",
-      method: "GET",
-      path: "/v1/customers",
-      statusCode: 429,
-      responseTime: "96 ms",
-      ip: "103.48.12.47",
-    },
-    {
-      id: "req-4",
-      timestamp: "2026-06-05T08:57:00.000Z",
-      method: "DELETE",
-      path: "/v1/orders/743",
-      statusCode: 401,
-      responseTime: "72 ms",
-      ip: "103.48.12.51",
-    },
-  ],
-};
 
 function ChartEmptyState() {
   return (
@@ -232,7 +127,7 @@ function getStatusCodePieData(metrics) {
       const statusCode = Number(key.replace("statusCode:", ""));
       const family =
         statusCode >= 200 && statusCode < 600
-          ? `${Math.floor(statusCode / 100)}xx`
+          ? `${(Math.floor(statusCode)/100).toFixed(0)}xx`
           : "Other";
 
       acc[family] = (acc[family] || 0) + Number(value || 0);
@@ -248,28 +143,92 @@ function getStatusCodePieData(metrics) {
     .filter((item) => item.value > 0);
 }
 
-export default function KeyAnalytics({ keyId: keyIdProp, analyticsData }) {
+export default function KeyAnalytics({ keyId: keyIdProp}) {
   const params = useParams();
   const keyId = keyIdProp ?? params.keyId ?? "selected-key";
-  const [keyAnalytics] = useState(analyticsData ?? sampleKeyAnalytics);
-  const metrics = keyAnalytics.metrics;
-  const totalRequests = metrics.requests || 0;
-  const totalErrors = metrics.errors || 0;
+  const [keyAnalytics,setKeyAnalytics] = useState(null);
+  const [hourlyMetricsChart,setHourlyMetricsChart] = useState([]);
+  const [dailyMetricsChart,setDailyMetricsChart] = useState([]);
+  const [Logs,setLogs] = useState([]);
+  const metrics = keyAnalytics?.apikeyGlobal;
+  const hourlyMetrics = keyAnalytics?.apikeyMetricsHourly;
+  const dailyMetrics = keyAnalytics?.apikeyMetricsDaily;
+  const totalRequests = metrics?.requests || 0;
+  const totalErrors = metrics?.errors || 0;
   const errorRate = totalRequests ? ((totalErrors / totalRequests) * 100).toFixed(2) : "0.00";
   const successRate = (100 - Number(errorRate)).toFixed(2);
+  const [loader,setLoader] = useState(true);
 
   const metricCards = [
     { label: "Total Requests", value: totalRequests.toLocaleString(), icon: Activity, tone: "purple" },
-    { label: "Average Latency", value: `${metrics.avglatency.toFixed(2)} ms`, icon: Clock3, tone: "cyan" },
+    { label: "Average Latency", value: `${metrics?.avglatency?.toFixed(2)} ms`, icon: Clock3, tone: "cyan" },
     { label: "Error Rate", value: `${errorRate}%`, icon: AlertTriangle, tone: "rose" },
-    { label: "Rate-Limited Requests", value: metrics.rateLimited.toLocaleString(), icon: ShieldAlert, tone: "amber" },
+    { label: "Rate-Limited Requests", value: metrics?.rateLimited?.toLocaleString() || "0", icon: ShieldAlert, tone: "amber" },
     { label: "Success Rate", value: `${successRate}%`, icon: CheckCircle2, tone: "emerald" },
   ];
 
   const statusCodePieData = useMemo(() => getStatusCodePieData(metrics), [metrics]);
+  const fetchKeyMetrics = async() => {
+    try{
+      const response = await axios.get('http://localhost:3000/metrics/apikey/'+keyId,{
+        withCredentials: true,
+    });
+    console.log("Fetched key analytics:", response.data);
+      
+    setKeyAnalytics(response.data);
+  }
+  catch(error){
+    console.error("Error fetching key analytics:", error);
+  }
+};
+const fetchKeyHourlyMatrics = async() =>{
+  try{
+    const response = await axios.get('http://localhost:3000/metrics/apikeyhourlymetrics/'+keyId,{
+      withCredentials: true,
+  });
+  console.log("Fetched key hourly analytics:", response.data);
+  setHourlyMetricsChart(response.data);
+  }
+  catch(error){
+    console.error("Error fetching key hourly analytics:", error);
+  }
+};
+const fetchKeyDailyMatrics = async() =>{
+  try{
+    const response = await axios.get('http://localhost:3000/metrics/apikeydailyMetrics/'+keyId,{
+      withCredentials: true,
+  });
+  console.log("Fetched key daily analytics:", response.data);
+  setDailyMetricsChart(response.data);
+  }
+  catch(error){
+    console.error("Error fetching key daily analytics:", error);
+  }
+};
 
+const getApiKeyLogs = async() =>{
+  try{
+    const response =await axios.get('http://localhost:3000/apikeyLogs/'+keyId,{
+      withCredentials: true,
+  });
+  console.log("9999999 Fetched key logs:", response.data);
+  setLogs(response.data.logs);
+  }
+  catch(error){
+    console.error("Error fetching key logs:", error);
+  }
+}
+useEffect(() =>{
+  setLoader(true);
+  fetchKeyMetrics();
+  fetchKeyHourlyMatrics();
+  fetchKeyDailyMatrics();
+  getApiKeyLogs();
+  setLoader(false);
+  },[keyId]);
   return (
     <main className="lg:ml-72">
+      <Navbar />
       <section className="mx-auto max-w-[1440px] space-y-8 px-4 py-7 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div>
@@ -283,17 +242,7 @@ export default function KeyAnalytics({ keyId: keyIdProp, analyticsData }) {
               <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/15 text-purple-300 ring-1 ring-purple-400/25">
                 <KeyRound size={18} />
               </span>
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="font-semibold text-white">{keyAnalytics.key.name}</p>
-                  <span className="rounded-lg bg-emerald-400/10 px-2 py-1 text-xs font-semibold text-emerald-300 ring-1 ring-emerald-400/20">
-                    {keyAnalytics.key.status}
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-slate-500">
-                  {keyAnalytics.key.prefix} · {keyAnalytics.key.tier} · {keyId}
-                </p>
-              </div>
+              
             </div>
           </div>
         </div>
@@ -306,9 +255,9 @@ export default function KeyAnalytics({ keyId: keyIdProp, analyticsData }) {
 
         <section className="grid gap-5 xl:grid-cols-2">
           <ChartPanel title="Hourly Request Volume" description="Request count authenticated by this key.">
-            {keyAnalytics.hourlyRequests.length ? (
+            {hourlyMetricsChart?.hourlyRequests?.length ? (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={keyAnalytics.hourlyRequests} margin={{ top: 12, right: 20, left: 0, bottom: 10 }}>
+                <AreaChart data={hourlyMetricsChart.hourlyRequests} margin={{ top: 12, right: 20, left: 0, bottom: 10 }}>
                   <defs>
                     <linearGradient id="keyRequestVolume" x1="0" x2="0" y1="0" y2="1">
                       <stop offset="5%" stopColor="#a855f7" stopOpacity={0.35} />
@@ -383,9 +332,9 @@ export default function KeyAnalytics({ keyId: keyIdProp, analyticsData }) {
           </ChartPanel>
 
           <ChartPanel title="Hourly Average Latency" description="Average response time in milliseconds.">
-            {keyAnalytics.hourlyLatency.length ? (
+            {hourlyMetricsChart?.hourlyLatency?.length ? (
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={keyAnalytics.hourlyLatency} margin={{ top: 12, right: 20, left: 0, bottom: 10 }}>
+                <LineChart data={hourlyMetricsChart?.hourlyLatency} margin={{ top: 12, right: 20, left: 0, bottom: 10 }}>
                   <CartesianGrid stroke="#20202a" strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="hour" axisLine={false} tickLine={false} tick={chartAxisTick} />
                   <YAxis axisLine={false} tickLine={false} tick={chartAxisTick} width={42} />
@@ -412,9 +361,9 @@ export default function KeyAnalytics({ keyId: keyIdProp, analyticsData }) {
           </ChartPanel>
 
           <ChartPanel title="Hourly Errors" description="Failed requests authenticated by this key.">
-            {keyAnalytics.hourlyErrors.length ? (
+            {hourlyMetricsChart?.hourlyErrors?.length ? (
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={keyAnalytics.hourlyErrors} margin={{ top: 12, right: 20, left: 0, bottom: 10 }}>
+                <LineChart data={hourlyMetricsChart?.hourlyErrors} margin={{ top: 12, right: 20, left: 0, bottom: 10 }}>
                   <CartesianGrid stroke="#20202a" strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="hour" axisLine={false} tickLine={false} tick={chartAxisTick} />
                   <YAxis axisLine={false} tickLine={false} tick={chartAxisTick} width={42} />
@@ -441,9 +390,9 @@ export default function KeyAnalytics({ keyId: keyIdProp, analyticsData }) {
           </ChartPanel>
 
           <ChartPanel title="Daily Request Volume" description="Last 7 days of requests for this key.">
-            {keyAnalytics.dailyRequests.length ? (
+            {dailyMetricsChart?.dailyRequests?.length ? (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={keyAnalytics.dailyRequests} margin={{ top: 12, right: 20, left: 0, bottom: 10 }}>
+                <AreaChart data={dailyMetricsChart.dailyRequests} margin={{ top: 12, right: 20, left: 0, bottom: 10 }}>
                   <defs>
                     <linearGradient id="keyDailyRequestVolume" x1="0" x2="0" y1="0" y2="1">
                       <stop offset="5%" stopColor="#a855f7" stopOpacity={0.35} />
@@ -477,9 +426,9 @@ export default function KeyAnalytics({ keyId: keyIdProp, analyticsData }) {
           </ChartPanel>
 
           <ChartPanel title="Daily Errors" description="Last 7 days of failed requests for this key.">
-            {keyAnalytics.dailyErrors.length ? (
+            {dailyMetricsChart?.dailyErrors?.length ? (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={keyAnalytics.dailyErrors} margin={{ top: 12, right: 20, left: 0, bottom: 10 }}>
+                <AreaChart data={dailyMetricsChart.dailyErrors} margin={{ top: 12, right: 20, left: 0, bottom: 10 }}>
                   <defs>
                     <linearGradient id="keyDailyErrorVolume" x1="0" x2="0" y1="0" y2="1">
                       <stop offset="5%" stopColor="#f87171" stopOpacity={0.35} />
@@ -535,8 +484,8 @@ export default function KeyAnalytics({ keyId: keyIdProp, analyticsData }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#20202a] text-slate-300">
-                {keyAnalytics.logs.map((request) => (
-                  <tr key={request.id} className="transition hover:bg-[#101018]">
+                {Logs?.map((request) => (
+                  <tr key={request._id} className="transition hover:bg-[#101018]">
                     <td className="py-3 pr-4 text-slate-500">
                       {request.timestamp
                         ? new Date(request.timestamp).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })

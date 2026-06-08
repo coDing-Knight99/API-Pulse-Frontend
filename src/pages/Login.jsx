@@ -7,38 +7,42 @@ import { useNavigate } from "react-router-dom";
 const Login = () => {
   const [loader, setloader] = useState(false)
   const [isLogin, setIsLogin] = useState(true);
-  const [name, setname] = useState('')
+  const [username, setusername] = useState('')
   const [email, setemail] = useState('')
   const [password, setpassword] = useState('')
   const [emaillog, setemaillog] = useState('')
   const [passwordlog, setpasswordlog] = useState('')
   const navigate = useNavigate();
   const Register = async function(){
-    console.log({name,email,password});
+    console.log({username,email,password});
     try{
         setloader(true);
-        const res=await axios.post("http://localhost:3000/register",{name,email,password});
-        document.getElementById("name").value='';
+        const res=await axios.post("http://localhost:3000/register",{username,email,password},{
+          withCredentials: true,
+        });
+        document.getElementById("username").value='';
         document.getElementById("email").value='';
         document.getElementById("password").value='';
         setemail('');
-        setname('');
+        setusername('');
         setpassword('');
         toast(res.data.message,{className:"font-bold text-lg"});
         console.log(res.status)
         if(res.status==201)
         {
           try{
-            const resLog = await axios.post("http://localhost:3000/login",{name,email,password});
-            toast(resLog.data.message,{className:"font-bold text-lg"});
+            const resLog = await axios.post("http://localhost:3000/login",{username,email,password},{
+              withCredentials: true,
+            });
+            toast(resLog.data.message,{className:"font-bold text-lg background-black text-white"});
             console.log(res.data);
+            navigate('/',{replace:true})
           }
           catch(error)
           {
             console.error("Error Logging in after registering",error);
             toast("Login Failed!",{className:"font-bold text-lg"});
           }
-          navigate('/',{replace:true})
         }
         // await handleLogin();
         setloader(false);
@@ -55,14 +59,16 @@ const handleLogin = async function(){
   console.log({emaillog,passwordlog});
   try{
     setloader(true);
-    const res = await axios.post("http://localhost:3000/login",{email:emaillog,password:passwordlog},{withCredentials:true});
+    const res = await axios.post("http://localhost:3000/login",{email:emaillog,password:passwordlog},{
+      withCredentials:true
+    });
     document.getElementById("emaillog").value='';
     document.getElementById("passwordlog").value='';
     setpasswordlog('');
-    setusernamelog('');
+    setemaillog('');
     setloader(false);
     // toast(res.data.message,{className:"font-bold text-lg"});
-    // navigate('/',{replace:true})
+    navigate('/',{replace:true})
     // console.log(res.data);
   }catch(error){
     setloader(false);
@@ -74,7 +80,7 @@ const handleLogin = async function(){
 
   return (
     <div className="relative flex min-h-screen w-full overflow-hidden bg-[#050508] text-slate-100">
-      <ToastContainer/>
+      <ToastContainer className="font-bold text-lg background-black text-white"/>
       {loader && <Loader/>}
       <div
         className={`absolute top-0 hidden h-full w-1/2 overflow-hidden border-[#20202a] transition-all duration-700 ease-in-out lg:block lg:z-50 ${
@@ -162,20 +168,6 @@ const handleLogin = async function(){
           </h1>
 
           <div className="flex w-full flex-col gap-5">
-            <div className="flex flex-col text-left">
-              <label className="mb-2 text-sm font-medium text-slate-300">
-                Full Name
-              </label>
-              <input
-                id="fullname"
-                onChange={(e)=>{
-                  setfullname(e.target.value)
-                }}
-                type="text"
-                placeholder="Enter your full name"
-                className="h-11 rounded-lg border border-[#20202a] bg-[#08080d] px-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-purple-400/70 focus:ring-2 focus:ring-purple-400/10"
-              />
-            </div>
 
             <div className="flex flex-col text-left">
               <label className="mb-2 text-sm font-medium text-slate-300">
@@ -235,7 +227,7 @@ const handleLogin = async function(){
                 document.getElementById("name").value='';
         document.getElementById("email").value='';
         document.getElementById("password").value='';
-        setname('');
+        setusername('');
         setemail('');
         setpassword('');
               }

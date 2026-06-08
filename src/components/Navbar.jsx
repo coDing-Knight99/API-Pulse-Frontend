@@ -1,19 +1,21 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import {toast} from "react-toastify";
+import logo from "../assets/APIPulse.png";
 import {
   Activity,
   Bell,
   Braces,
-  ChevronDown,
   Gauge,
   KeyRound,
-  LogIn,
+  LogOut,
   Menu,
   Search,
   Server,
   X,
 } from "lucide-react";
 
+import axios from "axios";
 const navItems = [
   { label: "Dashboard", route: "/", icon: Gauge, eyebrow: "Overview" },
   { label: "Services", route: "/services", icon: Server, eyebrow: "Registry" },
@@ -83,38 +85,30 @@ function NavItem({ item, active, onNavigate }) {
 }
 
 function SidebarContent({ pathname, onNavigate }) {
+  const navigate = useNavigate();
+  const logout = () => {
+    try{
+      const response = axios.post("http://localhost:3000/logout",{},{
+        withCredentials: true,
+      });
+      console.log(response);
+        toast("Logged out successfully!",{className:"font-bold text-lg"});
+        navigate("/login",{replace:true});
+    }catch(error)
+    {
+      console.error("Logout failed:", error);
+      toast("Logout failed",{className:"font-bold text-lg"});
+    }
+  }
   return (
     <div className="flex h-full flex-col bg-[#050508]">
-      <button
-        type="button"
-        onClick={() => onNavigate("/")}
-        className="flex h-20 items-center gap-3 border-b border-[#20202a] px-5 text-left transition hover:bg-[#0b0b12]"
-      >
-        <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-purple-500 text-white shadow-lg shadow-purple-950/30">
-          <Activity size={23} strokeWidth={2.5} />
-        </span>
-        <span>
-          <span className="block text-base font-bold leading-5 text-white">API-Pulse</span>
-          <span className="block text-xs text-slate-500">Gateway Control</span>
-        </span>
-      </button>
+      
 
-      <div className="px-4 py-5">
-        <div className="relative">
-          <Search
-            size={17}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
-          />
-          <input
-            type="search"
-            placeholder="Search workspace"
-            className="h-11 w-full rounded-lg border border-[#20202a] bg-[#0b0b12] pl-10 pr-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-purple-400/70 focus:ring-2 focus:ring-purple-400/10"
-          />
+      <nav className="flex-1 space-y-2 overflow-y-auto px-4 pb-4 lg:pt-4">
+        <div className="flex items-center justify-center">
+          <img src={logo} alt="API-Pulse" className="h-45 w-45" />
         </div>
-      </div>
-
-      <nav className="flex-1 space-y-2 overflow-y-auto px-4 pb-4">
-        <p className="px-3 pb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <p className="p-3 pb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
           Navigate
         </p>
         {navItems.map((item) => (
@@ -128,23 +122,26 @@ function SidebarContent({ pathname, onNavigate }) {
       </nav>
 
       <div className="border-t border-[#20202a] p-4">
-        <button
-          type="button"
-          onClick={() => onNavigate("/login")}
-          className={`flex w-full items-center gap-3 rounded-lg border px-3 py-3 text-left transition ${
-            pathname === "/login"
-              ? "border-purple-400/25 bg-purple-500/15 text-white"
-              : "border-[#20202a] bg-[#0b0b12] text-slate-300 hover:border-purple-400/30 hover:bg-[#151521] hover:text-white"
-          }`}
-        >
-          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#151521] text-purple-300 ring-1 ring-purple-400/20">
-            <LogIn size={18} />
-          </span>
-          <span>
-            <span className="block text-sm font-semibold">Login</span>
-            <span className="block text-xs text-slate-500">Account access</span>
-          </span>
-        </button>
+        <div className="rounded-lg border border-[#20202a] bg-[#0b0b12] p-3">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-500 text-sm font-bold text-white">
+              D
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-semibold text-white">Dhruv</span>
+              <span className="block truncate text-xs text-slate-500">Account</span>
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={logout}
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-[#20202a] px-3 py-2 text-sm font-semibold text-slate-300 transition hover:border-purple-400/30 hover:bg-[#151521] hover:text-white"
+          >
+            <LogOut size={16} />
+            Logout
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -155,7 +152,6 @@ export default function Navbar() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const currentRoute = getCurrentRoute(pathname);
-
   function handleNavigate(route) {
     navigate(route);
     setMobileOpen(false);
@@ -167,12 +163,12 @@ export default function Navbar() {
         <SidebarContent pathname={pathname} onNavigate={handleNavigate} />
       </aside>
 
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-[#20202a] bg-[#050508]/95 px-4 backdrop-blur lg:ml-72 lg:px-6">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            aria-label="Open navigation"
-            onClick={() => setMobileOpen(true)}
+        <header className="lg:hidden sticky top-0 z-30 flex h-16 items-center justify-between border-b border-[#20202a] bg-[#050508]/95 px-4 backdrop-blur lg:ml-72 lg:px-6">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              aria-label="Open navigation"
+              onClick={() => setMobileOpen(true)}
             className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#20202a] text-slate-200 transition hover:bg-[#151521] lg:hidden"
           >
             <Menu size={20} />
@@ -181,35 +177,6 @@ export default function Navbar() {
             <p className="text-sm font-medium text-slate-500">{currentRoute.section}</p>
             <h1 className="text-lg font-semibold text-white sm:text-xl">{currentRoute.title}</h1>
           </div>
-        </div>
-
-        <div className="flex items-center gap-2 sm:gap-3">
-          <button
-            type="button"
-            aria-label="Search"
-            className="hidden h-10 w-10 items-center justify-center rounded-lg border border-[#20202a] text-slate-400 transition hover:bg-[#151521] hover:text-white sm:inline-flex"
-          >
-            <Search size={18} />
-          </button>
-          <button
-            type="button"
-            aria-label="Notifications"
-            className="relative inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#20202a] text-slate-400 transition hover:bg-[#151521] hover:text-white"
-          >
-            <Bell size={18} />
-            <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-rose-400" />
-          </button>
-          <button
-            type="button"
-            onClick={() => handleNavigate("/login")}
-            className="flex h-10 items-center gap-2 rounded-lg border border-[#20202a] bg-[#0b0b12] px-2 text-sm text-slate-200 transition hover:border-purple-400/40 hover:bg-[#151521] sm:px-3"
-          >
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-purple-500 text-xs font-bold text-white">
-              D
-            </span>
-            <span className="hidden sm:inline">Dhruv</span>
-            <ChevronDown size={15} className="hidden text-slate-500 sm:block" />
-          </button>
         </div>
       </header>
 

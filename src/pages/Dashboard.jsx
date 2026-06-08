@@ -14,6 +14,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import RequestsChart from "../components/RequestsChart.jsx";
 import StatusCodePieChart from "../components/StatusPieChart.jsx";
+import Navbar from "../components/Navbar.jsx";
 const metrics = [
   {
     label: "Total Requests",
@@ -141,7 +142,7 @@ function StatusPieChart() {
   return (
     <section className="rounded-lg border border-[#20202a] bg-[#0b0b12] p-5">
       <h2 className="text-lg font-semibold text-white">Status Codes</h2>
-      <p className="mt-1 text-sm text-slate-400">Response distribution by code family.</p>
+      <p className="mt-1 text-sm text-slate-400">Response distribution by code family</p>
 
       <div className="mt-6 flex flex-col items-center gap-6">
         <svg viewBox="0 0 120 120" className="h-48 w-48 -rotate-90" role="img">
@@ -181,7 +182,10 @@ function StatusPieChart() {
 export default function Dashboard() {
   let [UserMetrics, setUserMetrics] = useState(null);
   let [hourlyRequests, setHourlyRequests] = useState([]);
-
+  let [requests, setRequests] = useState(0);
+  let [errorRate, setErrorRate] = useState(0);
+  let [avgLatency, setAvgLatency] = useState(0);
+  let [rateLimits, setRateLimits] = useState(0);
 useEffect(()=> {
   const fetchUserMetrics = async () => {
   try {
@@ -190,6 +194,16 @@ useEffect(()=> {
     });
     // Update state with real metrics data
     setUserMetrics(response.data);
+    if(response.data.userGlobal.requests !== undefined)
+    setRequests(response.data.userGlobal.requests);
+    if(response.data.userGlobal.requests > 0) 
+    setErrorRate((((response.data.userGlobal.errors || 0) / Math.max(response.data.userGlobal.requests, 1)) * 100).toFixed(2));
+    if(response.data.userGlobal.avglatency !== undefined) {
+      setAvgLatency((response.data.userGlobal.avglatency).toFixed(2));
+    }
+    if(response.data.userGlobal.rateLimited !== undefined) {
+      setRateLimits(response.data.userGlobal.rateLimited);
+    }
     console.log("Fetched user metrics:", response.data);
     const hourlyData = await axios.get(`http://localhost:3000/metrics/userhourlyrequests`,{
       withCredentials: true
@@ -203,10 +217,10 @@ useEffect(()=> {
   return (
     <main className="lg:ml-72">
       <section className="mx-auto max-w-[1440px] space-y-8 px-4 py-7 sm:px-6 lg:px-8">
-
+        <Navbar/>
         <div className="flex flex-col gap-2">
           <p className="text-sm font-semibold uppercase tracking-wide text-purple-300">Gateway overview</p>
-          <h1 className="text-3xl font-bold tracking-tight text-white">Daily Metrics</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-white">Traffic Metrics</h1>
           <p className="max-w-2xl text-sm text-slate-400">
             Monitor request volume, latency, errors, and rate limits across today's API traffic.
           </p>
@@ -219,8 +233,8 @@ useEffect(()=> {
           <div className="min-h-36 rounded-lg border border-[#20202a] bg-[#0b0b12] p-6 shadow-2xl shadow-black/10 transition hover:border-purple-400/30 hover:bg-[#101018]">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-sm font-medium text-slate-400">Total Requests Today</p>
-                <p className="mt-4 text-3xl font-bold tracking-tight text-white">{UserMetrics ? UserMetrics.userGlobal.requests : <Loader/>}</p>
+                <p className="text-sm font-medium text-slate-400">Total Requests</p>
+                <p className="mt-4 text-3xl font-bold tracking-tight text-white">{requests}</p>
               </div>
               <div className="rounded-lg bg-purple-500/12 p-3 text-purple-300 ring-1 ring-purple-400/25">
                 <Activity size={20} />
@@ -231,7 +245,7 @@ useEffect(()=> {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-medium text-slate-400">Average Latency</p>
-                <p className="mt-4 text-3xl font-bold tracking-tight text-white">{UserMetrics ? `${(UserMetrics.userGlobal.avglatency).toFixed(2)} ms` : <Loader />}</p>
+                <p className="mt-4 text-3xl font-bold tracking-tight text-white">{avgLatency+" ms"}</p>
               </div>
               <div className="rounded-lg bg-emerald-400/10 p-3 text-emerald-300 ring-1 ring-emerald-400/20">
                 <Clock3 size={20} />
@@ -242,7 +256,7 @@ useEffect(()=> {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-medium text-slate-400">Error Rate</p>
-                <p className="mt-4 text-3xl font-bold tracking-tight text-white">{UserMetrics ? `${((UserMetrics.userGlobal.errors?UserMetrics.userGlobal.errors:0)/Math.max(UserMetrics.userGlobal.requests, 1)*100).toFixed(2)}%` : <Loader />}</p>
+                <p className="mt-4 text-3xl font-bold tracking-tight text-white">{errorRate+"%"}</p>
               </div>
               <div className="rounded-lg bg-rose-400/10 p-3 text-rose-300 ring-1 ring-rose-400/20">
                 <AlertTriangle size={20} />
@@ -253,7 +267,7 @@ useEffect(()=> {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-medium text-slate-400">Rate Limit hits</p>
-                <p className="mt-4 text-3xl font-bold tracking-tight text-white">{UserMetrics ? UserMetrics.userGlobal.rateLimited ? UserMetrics.userGlobal.rateLimited : 0 : <Loader />}</p>
+                <p className="mt-4 text-3xl font-bold tracking-tight text-white">{rateLimits}</p>
               </div>
               <div className="rounded-lg bg-amber-400/10 p-3 text-amber-300 ring-1 ring-amber-400/20">
                 <ShieldAlert size={20} />
@@ -264,7 +278,7 @@ useEffect(()=> {
 
         <section className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(360px,1fr)]">
           <RequestsChart data={hourlyRequests} />
-          <StatusCodePieChart data={UserMetrics ? UserMetrics.userMetricsDaily : null} title="Daily Status Codes" />
+          <StatusCodePieChart data={UserMetrics ? UserMetrics.userGlobal : null} title="Status Codes Distribution" />
         </section>
        
 

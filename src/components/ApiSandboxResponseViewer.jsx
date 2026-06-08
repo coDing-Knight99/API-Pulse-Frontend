@@ -1,6 +1,7 @@
 import { Braces, Clock3, Copy, Gauge } from "lucide-react";
 
 function highlightedJson(value) {
+  console.log(value);
   return JSON.stringify(value, null, 2)
     .split("\n")
     .map((line, lineIndex) => (
@@ -37,7 +38,7 @@ export default function ApiSandboxResponseViewer({ response }) {
       : response.status >= 400
         ? "bg-amber-400/10 text-amber-300 ring-amber-400/20"
         : "bg-emerald-400/10 text-emerald-300 ring-emerald-400/20";
-
+console.log(response);
   return (
     <section className="rounded-lg border border-[#20202a] bg-[#0b0b12] p-5 shadow-2xl shadow-black/10 sm:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -61,7 +62,7 @@ export default function ApiSandboxResponseViewer({ response }) {
             <p className="text-xs font-semibold uppercase tracking-wide">Status</p>
           </div>
           <span className={`mt-3 inline-flex rounded-lg px-2 py-1 text-sm font-bold ring-1 ${statusTone}`}>
-            {response.status} {response.statusText}
+            {response.status?response.status: "-"} {response.statusText?response.statusText:""}
           </span>
         </div>
         <div className="rounded-lg border border-[#20202a] bg-[#08080d] p-4">
@@ -69,14 +70,14 @@ export default function ApiSandboxResponseViewer({ response }) {
             <Clock3 size={16} />
             <p className="text-xs font-semibold uppercase tracking-wide">Latency</p>
           </div>
-          <p className="mt-3 text-2xl font-bold text-white">{response.latency} ms</p>
+          <p className="mt-3 text-2xl font-bold text-white">{response.data?.latency?response.data?.latency+ " ms":"-"}</p>
         </div>
         <div className="rounded-lg border border-[#20202a] bg-[#08080d] p-4">
           <div className="flex items-center gap-2 text-slate-500">
             <Braces size={16} />
             <p className="text-xs font-semibold uppercase tracking-wide">Payload</p>
           </div>
-          <p className="mt-3 text-2xl font-bold text-white">{response.size}</p>
+          <p className="mt-3 text-2xl font-bold text-white">{response.size?response.size:"-"}</p>
         </div>
       </div>
 
@@ -88,7 +89,7 @@ export default function ApiSandboxResponseViewer({ response }) {
           </span>
         </div>
         <pre className="max-h-[34rem] overflow-auto p-4 font-mono text-sm leading-6">
-          <code>{highlightedJson(response.body)}</code>
+          <code>{highlightedJson(response.data?.data || {})}</code>
         </pre>
       </div>
     </section>

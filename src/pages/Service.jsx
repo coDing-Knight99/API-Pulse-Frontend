@@ -13,7 +13,7 @@ import axios from "axios";
 import Loader from "../components/Loader";
 import RegisterService from "./RegisterService";
 import EditService from "./EditService";
-
+import Navbar from "../components/Navbar";
 const statusStyles = {
   true: "bg-emerald-400/10 text-emerald-300 ring-emerald-400/20",
   false: "bg-rose-400/10 text-rose-300 ring-rose-400/20",
@@ -179,12 +179,30 @@ function RecentLogs({Logs}) {
   );
 }
 
+
 export default function Service() {
   const [Services, setServices] = useState(null);
   const [logs, setLogs] = useState(null);
   const [loader, setloader] = useState(false);
   const [addService, setaddService] = useState(false);
   const [editService, setEditService] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredServices, setFilteredServices] = useState(null);
+    const filter=(Query)=>{
+      console.log("Filtering services with query:", Query);
+      if(!Query || Query === "")
+      {
+        console.log("No search query provided. Showing all services.");
+        setFilteredServices(Services);
+        console.log("All services:", Services);
+        console.log("Filtered services:", filteredServices);
+        return;
+      }
+      const filtered=Services.filter((service)=>{
+        return service.service_name.toLowerCase().includes(Query.toLowerCase()) || service.url.toLowerCase().includes(Query.toLowerCase());
+      })
+      setFilteredServices(filtered);
+    }
    const fetchServices = async () => {
     await Promise.resolve();
     try {
@@ -197,6 +215,7 @@ export default function Service() {
       });
       setloader(false);
       setServices(response.data.services);
+      setFilteredServices(response.data.services);
       setLogs(logsResponse.data.logs);
       console.log("Fetched services:", response.data);
       console.log("Fetched logs:", logsResponse.data);
@@ -204,15 +223,12 @@ export default function Service() {
       console.error("Error fetching services:", error);
     }
   };  
-useEffect(() => {
-  const timer = setTimeout(() => {
+  useEffect(() => {
     fetchServices();
-  }, 0);
-
-  return () => clearTimeout(timer);
 }, []);
   return (
     <main className="lg:ml-72">
+      <Navbar/>
       {loader && <Loader/>}
       {addService && <RegisterService setaddService={setaddService} setloader={setloader} fetchServices={fetchServices}/>}
       {editService && <EditService service={editService} setEditService={setEditService} setloader={setloader} fetchServices={fetchServices}/>}
@@ -228,7 +244,7 @@ useEffect(() => {
           <p className="text-sm font-semibold uppercase tracking-wide text-purple-300">Service registry</p>
           <h1 className="text-3xl font-bold tracking-tight text-white">Services</h1>
           <p className="max-w-2xl text-sm text-slate-400">
-            Review registered APIs, health signals, and recent gateway activity.
+            Review registered APIs, health signals, and recent gateway activity
           </p>
         </div>
 
@@ -239,16 +255,30 @@ useEffect(() => {
           />
           <input
             type="search"
-            placeholder="Search by service name, URL, or status"
+            onChange={(e)=>{
+              setSearchQuery(e.target.value);
+              filter(e.target.value);
+            }}
+            placeholder="Search by service name or URL"
             className="h-11 w-full rounded-lg border border-[#20202a] bg-[#0b0b12] pl-10 pr-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-purple-400/70 focus:ring-2 focus:ring-purple-400/10"
           />
         </div>
 
-        <section className="grid gap-5 lg:grid-cols-2 2xl:grid-cols-3">
-          {Services?Services.map((service) => (
-            <ServiceCard key={service._id} Services={service} setEditService={setEditService} setLoader={setloader} fetchServices={fetchServices} />
-          )):(<p className="text-slate-400">No services found.</p>)}
-        </section>
+        {filteredServices && filteredServices.length > 0 && (
+          <section className="grid gap-5 lg:grid-cols-2 2xl:grid-cols-3">
+            {filteredServices.map((service) => (
+              <ServiceCard key={service._id} Services={service} setEditService={setEditService} setLoader={setloader} fetchServices={fetchServices} />
+            ))}
+          </section>
+        )}
+
+        {
+          filteredServices && filteredServices.length === 0 && (
+            <div className="rounded-lg border border-[#20202a] bg-[#0b0b12] p-6 text-center">
+              <p className="text-sm text-slate-400">No services found matching your search.</p>
+            </div>
+          )   
+        }
 
         <RecentLogs Logs={logs?logs:[]} />
       </section>

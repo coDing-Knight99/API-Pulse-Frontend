@@ -10,6 +10,7 @@
   import { useState,useEffect } from "react";
   import Loader from "../components/Loader";
   import axios from "axios";
+  import Navbar from "../components/Navbar";
   import {
     Area,
     AreaChart,
@@ -146,16 +147,20 @@
     const [dailyErrors,setDailyErrors]= useState([]);
     const [dailyLatency,setDailyLatency]= useState([]);
     const [logs,setLogs]=useState([]);
-    const totalRequests = serviceMetrics?.serviceMetricsDaily.requests || 0;
-    const totalErrors = serviceMetrics?.serviceMetricsDaily.errors || 0;
-    const errorRate = totalRequests ? ((totalErrors / totalRequests) * 100).toFixed(2) : "0.00";
+    const [requests,setRequests]=useState(0);
+    const [errorRate,setErrorRate]=useState("0.00");
+    const [avgLatency,setAvgLatency]=useState(0);
+    const [rateLimits,setRateLimits]=useState(0);
+    // const totalRequests = serviceMetrics?.serviceMetricsDaily.requests || 0;
+    // const totalErrors = serviceMetrics?.serviceMetricsDaily.errors || 0;
+    // const errorRate = totalRequests ? ((totalErrors / totalRequests) * 100).toFixed(2) : "0.00";
     console.log(errorRate)
     const [loader,setLoader]=useState(false);
     const metricCards = [
-    { label: "Total Requests", value: serviceMetrics?.serviceGlobal.requests || "", icon: Activity, tone: "purple" },
-    { label: "Average Latency", value: serviceMetrics?.serviceGlobal.avglatency ? `${serviceMetrics.serviceGlobal.avglatency.toFixed(2)} ms` : "", icon: Clock3, tone: "cyan" },
+    { label: "Total Requests", value: requests, icon: Activity, tone: "purple" },
+    { label: "Average Latency", value: avgLatency ? `${avgLatency.toFixed(2)} ms` : "0", icon: Clock3, tone: "cyan" },
     { label: "Error Rate", value: errorRate ? `${errorRate}%` : "-", icon: AlertTriangle, tone: "rose" },
-    { label: "Rate-Limited Requests", value: serviceMetrics?.serviceGlobal.rateLimited ? serviceMetrics.serviceGlobal.rateLimited : 0, icon: ShieldAlert, tone: "amber" },
+    { label: "Rate-Limited Requests", value: rateLimits, icon: ShieldAlert, tone: "amber" },
     { label: "Success Rate", value: errorRate !== null ? `${100 - parseFloat(errorRate)}%` : "", icon: CheckCircle2, tone: "emerald" },
   ];
     useEffect(() => {
@@ -178,7 +183,7 @@
             const dailyMetricsResponse = await axios.get('http://localhost:3000/metrics/servicedailymetrics/'+serviceId,{
               withCredentials:true,
             });
-            
+            console.log("Service Metrics:", metricsResponse.data);
           console.log("Daily Metrics:", dailyMetricsResponse.data);
           if (!isMounted) return;
 
@@ -190,6 +195,19 @@
           setDailyRequests(dailyMetricsResponse.data.dailyRequests);
           setDailyErrors(dailyMetricsResponse.data.dailyErrors);
           setDailyLatency(dailyMetricsResponse.data.dailyLatency);
+          if(metricsResponse.data.serviceGlobal.requests !== undefined) 
+          {
+            setRequests(metricsResponse.data.serviceGlobal.requests);
+          }
+          if(metricsResponse.data.serviceGlobal.requests > 0 && metricsResponse.data.serviceGlobal.errors !== undefined) {
+            setErrorRate((((metricsResponse.data.serviceGlobal.errors || 0) / Math.max(metricsResponse.data.serviceGlobal.requests, 1)) * 100).toFixed(2));
+          }
+          if(metricsResponse.data.serviceGlobal.avglatency !== undefined) {
+            setAvgLatency(metricsResponse.data.serviceGlobal.avglatency);
+          }
+          if(metricsResponse.data.serviceGlobal.rateLimited !== undefined) {
+            setRateLimits(metricsResponse.data.serviceGlobal.rateLimited);
+          }
         } catch (error) {
           console.error('Error fetching service analytics:', error);
         } finally {
@@ -228,7 +246,7 @@
       }))
       .filter((item) => item.value > 0);
   };
-    const statusCodePieData = getStatusCodePieData(serviceMetrics?serviceMetrics.serviceMetricsDaily:null);
+    const statusCodePieData = getStatusCodePieData(serviceMetrics?serviceMetrics.serviceGlobal:null);
     const hasHourlyRequests = hourlyRequests.length > 0;
     const hasHourlyLatency = hourlyLatency.length > 0;
     const hasHourlyErrors = hourlyErrors.length > 0;
@@ -238,6 +256,7 @@
     const hasDailyErrors = dailyErrors.length > 0;
     return (
       <main className="lg:ml-72">
+        <Navbar />
         <section className="mx-auto max-w-[1440px] space-y-8 px-4 py-7 sm:px-6 lg:px-8">
           {loader ? <Loader/> : null}
           <div className="flex flex-col gap-2">

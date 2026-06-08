@@ -7,18 +7,19 @@ import ServiceAnalytics from "./pages/ServiceAnalytics";
 import KeyAnalytics from "./pages/KeyAnalytics";
 import Login from "./pages/Login";
 import {Routes, Route} from "react-router-dom";
+import ProtectedRoute from "./components/ProtectedRoute";
 function App() {
   return (
     <div className="min-h-screen bg-[#050508]">
-      <Navbar />
+      
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/services" element={<Service />} />
-        <Route path="/services/:serviceId/analytics" element={<ServiceAnalytics />} />
-        <Route path="/api-keys" element={<ApiKeys />} />
-        <Route path="/api-keys/:keyId/analytics" element={<KeyAnalytics />} />
-        <Route path="/api-sandbox" element={<ApiSandbox />} />
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/services" element={<ProtectedRoute><Service /></ProtectedRoute>} />
+        <Route path="/services/:serviceId/analytics" element={<ProtectedRoute><ServiceAnalytics /></ProtectedRoute>} />
+        <Route path="/api-keys" element={<ProtectedRoute><ApiKeys /></ProtectedRoute>} />
+        <Route path="/api-keys/:keyId/analytics" element={<ProtectedRoute><KeyAnalytics /></ProtectedRoute>} />
+        <Route path="/api-sandbox" element={<ProtectedRoute><ApiSandbox /></ProtectedRoute>} />
+        <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       </Routes>
     </div>
   );
