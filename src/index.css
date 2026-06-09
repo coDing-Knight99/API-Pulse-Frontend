@@ -29,6 +29,81 @@ input {
   color: white;
 }
 
+.landing-reveal {
+  animation: landing-reveal 700ms ease both;
+}
+
+.landing-delay-2 {
+  animation-delay: 160ms;
+}
+
+.landing-flow {
+  animation: landing-flow 680ms ease both;
+}
+
+.landing-bar {
+  animation: landing-bar 900ms ease both;
+  transform-origin: bottom;
+}
+
+.landing-hero-float {
+  animation: landing-float 7s ease-in-out infinite;
+}
+
+@keyframes landing-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes landing-flow {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes landing-bar {
+  from {
+    transform: scaleY(0.08);
+  }
+
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes landing-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+
+  50% {
+    transform: translate3d(0, -18px, 0) rotate(2deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-reveal,
+  .landing-flow,
+  .landing-bar,
+  .landing-hero-float {
+    animation: none;
+  }
+}
+
 ::-webkit-scrollbar {
   width: 8px;
 }

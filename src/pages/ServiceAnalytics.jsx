@@ -161,7 +161,7 @@
     { label: "Average Latency", value: avgLatency ? `${avgLatency.toFixed(2)} ms` : "0", icon: Clock3, tone: "cyan" },
     { label: "Error Rate", value: errorRate ? `${errorRate}%` : "-", icon: AlertTriangle, tone: "rose" },
     { label: "Rate-Limited Requests", value: rateLimits, icon: ShieldAlert, tone: "amber" },
-    { label: "Success Rate", value: errorRate !== null ? `${100 - parseFloat(errorRate)}%` : "", icon: CheckCircle2, tone: "emerald" },
+    { label: "Success Rate", value: errorRate !== null ? `${(100 - parseFloat(errorRate)).toFixed(2)}%` : "", icon: CheckCircle2, tone: "emerald" },
   ];
     useEffect(() => {
       let isMounted = true;

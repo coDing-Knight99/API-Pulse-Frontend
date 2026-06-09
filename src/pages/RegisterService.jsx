@@ -3,7 +3,7 @@ import { useState } from 'react';
 
 import { Server, XIcon } from 'lucide-react';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { toast ,ToastContainer} from 'react-toastify';
 const RegisterService = ({ setaddService, setloader, fetchServices }) => {
     const [serviceName, setserviceName] = useState('');
     const [url, seturl] = useState('');
@@ -29,6 +29,7 @@ const RegisterService = ({ setaddService, setloader, fetchServices }) => {
         setaddService(false)
         document.body.classList.remove("overflow-hidden")
     }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 px-4 py-6 backdrop-blur-sm">
+        <ToastContainer/>
       <div onClick={(e)=>{e.stopPropagation()}} className="max-h-[88vh] w-full max-w-2xl overflow-y-auto rounded-lg border border-[#20202a] bg-[#0b0b12] p-6 shadow-2xl shadow-black/60 sm:p-8">
         <div className='flex items-start justify-between gap-4'>
         <div className='pb-8'>

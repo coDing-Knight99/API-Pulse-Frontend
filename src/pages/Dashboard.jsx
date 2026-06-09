@@ -199,7 +199,7 @@ useEffect(()=> {
     if(response.data.userGlobal.requests > 0) 
     setErrorRate((((response.data.userGlobal.errors || 0) / Math.max(response.data.userGlobal.requests, 1)) * 100).toFixed(2));
     if(response.data.userGlobal.avglatency !== undefined) {
-      setAvgLatency((response.data.userGlobal.avglatency).toFixed(2));
+      setAvgLatency((response.data.userGlobal.avglatency).toFixed(2)  );
     }
     if(response.data.userGlobal.rateLimited !== undefined) {
       setRateLimits(response.data.userGlobal.rateLimited);

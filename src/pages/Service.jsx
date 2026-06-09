@@ -6,7 +6,7 @@ import {
   Server,
   Trash2,
 } from "lucide-react";
-
+import {ToastContainer, toast} from "react-toastify";
 import { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -38,6 +38,7 @@ function ServiceCard({ setLoader,setEditService,fetchServices,Services }) {
   }
   return (
     <article className="rounded-lg border border-[#20202a] bg-[#0b0b12] p-6 shadow-2xl shadow-black/10 transition hover:border-purple-400/25 hover:bg-[#101018]">
+        <ToastContainer/>
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">

@@ -6,6 +6,7 @@ import Service from "./pages/Service";
 import ServiceAnalytics from "./pages/ServiceAnalytics";
 import KeyAnalytics from "./pages/KeyAnalytics";
 import Login from "./pages/Login";
+import LandingPage from "./pages/LandingPage";
 import {Routes, Route} from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 function App() {
@@ -13,6 +14,7 @@ function App() {
     <div className="min-h-screen bg-[#050508]">
       
       <Routes>
+        <Route path="/landing" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/services" element={<ProtectedRoute><Service /></ProtectedRoute>} />
         <Route path="/services/:serviceId/analytics" element={<ProtectedRoute><ServiceAnalytics /></ProtectedRoute>} />

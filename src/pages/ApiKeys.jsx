@@ -15,6 +15,7 @@ import { Link } from "react-router-dom";
 import Loader from "../components/Loader";
 import axios from "axios";
 import Navbar from "../components/Navbar";
+import KeyDisplay from "./KeyDisplay";
 const toneClasses = {
   purple: "bg-purple-500/12 text-purple-300 ring-purple-400/25",
   emerald: "bg-emerald-400/10 text-emerald-300 ring-emerald-400/20",
@@ -137,17 +138,18 @@ function KeyCard({ apiKey,revokeKey }) {
   );
 }
 
-function GenerateKeyModal({ onClose, setLoader }) {
+function GenerateKeyModal({ onClose, setLoader, fetchApiKeys, fetchlogs, setKeyDisplay }) {
   const [apiKeyName, setApiKeyName] = useState("");
-  const [apiKeyTier, setApiKeyTier] = useState("");
+  const [apiKeyTier, setApiKeyTier] = useState("Starter");
   const handleGenerate = async () => {
     try {
-      await axios.post("http://localhost:3000/create-api-key", {
+      const response = await axios.post("http://localhost:3000/create-api-key", {
         name: apiKeyName,
         tier: apiKeyTier
       },{
         withCredentials: true,
       });
+      setKeyDisplay(response.data.apiKey);
       setLoader(true);
       await fetchApiKeys();
       await fetchlogs();
@@ -251,7 +253,6 @@ function GenerateKeyModal({ onClose, setLoader }) {
 function RecentRequests({requests}) {
   return (
     <section className="rounded-lg border border-[#20202a] bg-[#0b0b12] p-6 shadow-2xl shadow-black/10">
-      <Navbar/>
       <div className="flex items-center justify-between gap-4">
         <div>
           <h2 className="text-lg font-semibold text-white">Recent requests</h2>
@@ -303,6 +304,7 @@ export default function ApiKeys() {
   const [loader, setLoader] = useState(false);
   const [apiKeys, setApiKeys] = useState([]);
   const [apiLogs, setApiLogs] = useState([]);
+  const [keyDisplay, setKeyDisplay] = useState(null);
   const fetchApiKeys = async () => {
     try {
       const response = await axios.get("http://localhost:3000/api-keys", {
@@ -350,7 +352,13 @@ export default function ApiKeys() {
   }, []);
   return (
     <main className="lg:ml-72">
+      {
+        !keyDisplay && <Navbar />
+      }
       {loader && <Loader />}
+      {
+        keyDisplay && <KeyDisplay apikey={keyDisplay} setKeyDisplay={setKeyDisplay} />
+      }
       <section className="mx-auto max-w-[1440px] space-y-8 px-4 py-7 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
@@ -378,7 +386,7 @@ export default function ApiKeys() {
         <RecentRequests requests={apiLogs?apiLogs:[]} />
       </section>
 
-      {generateOpen && <GenerateKeyModal onClose={() => setGenerateOpen(false)} setLoader={setLoader} />}
+      {generateOpen && <GenerateKeyModal onClose={() => setGenerateOpen(false)} setLoader={setLoader} fetchApiKeys={fetchApiKeys} fetchlogs={fetchlogs} setKeyDisplay={setKeyDisplay} />}
     </main>
   );
 }
