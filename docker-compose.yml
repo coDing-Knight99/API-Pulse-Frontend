@@ -1,0 +1,6 @@
+services:
+  frontend:
+    build:
+      context: ../API-Pulse Frontend
+    ports:
+      - "5173:80"

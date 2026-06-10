@@ -28,6 +28,8 @@ import {
   YAxis,
 } from "recharts";
 
+const Base_URL = import.meta.env.VITE_API_BASE_URL;
+
 const statusFamilyColors = {
   "2xx": "#22c55e",
   "3xx": "#38bdf8",
@@ -170,7 +172,7 @@ export default function KeyAnalytics({ keyId: keyIdProp}) {
   const statusCodePieData = useMemo(() => getStatusCodePieData(metrics), [metrics]);
   const fetchKeyMetrics = async() => {
     try{
-      const response = await axios.get('http://localhost:3000/metrics/apikey/'+keyId,{
+      const response = await axios.get(`${Base_URL}/metrics/apikey/${keyId}`,{
         withCredentials: true,
     });
     console.log("Fetched key analytics:", response.data);
@@ -183,7 +185,7 @@ export default function KeyAnalytics({ keyId: keyIdProp}) {
 };
 const fetchKeyHourlyMatrics = async() =>{
   try{
-    const response = await axios.get('http://localhost:3000/metrics/apikeyhourlymetrics/'+keyId,{
+    const response = await axios.get(`${Base_URL}/metrics/apikeyhourlymetrics/${keyId}`,{
       withCredentials: true,
   });
   console.log("Fetched key hourly analytics:", response.data);
@@ -195,7 +197,7 @@ const fetchKeyHourlyMatrics = async() =>{
 };
 const fetchKeyDailyMatrics = async() =>{
   try{
-    const response = await axios.get('http://localhost:3000/metrics/apikeydailyMetrics/'+keyId,{
+    const response = await axios.get(`${Base_URL}/metrics/apikeydailyMetrics/${keyId}`,{
       withCredentials: true,
   });
   console.log("Fetched key daily analytics:", response.data);
@@ -208,7 +210,7 @@ const fetchKeyDailyMatrics = async() =>{
 
 const getApiKeyLogs = async() =>{
   try{
-    const response =await axios.get('http://localhost:3000/apikeyLogs/'+keyId,{
+    const response =await axios.get(`${Base_URL}/apikeyLogs/${keyId}`,{
       withCredentials: true,
   });
   console.log("9999999 Fetched key logs:", response.data);

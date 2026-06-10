@@ -68,7 +68,7 @@ function FeatureCard({ feature, index }) {
   );
 }
 
-export default function LandingPage() {
+export default function   LandingPage() {
   return (
     <main className="min-h-screen overflow-hidden bg-[#050508] text-slate-100">
       <section className="relative min-h-[92vh] border-b border-white/10">

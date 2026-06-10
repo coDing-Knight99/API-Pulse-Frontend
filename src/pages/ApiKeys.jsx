@@ -16,13 +16,14 @@ import Loader from "../components/Loader";
 import axios from "axios";
 import Navbar from "../components/Navbar";
 import KeyDisplay from "./KeyDisplay";
+import ApiKeyRevokeConfirmation from "../components/ApiKeyRevokeConfirmation";
 const toneClasses = {
   purple: "bg-purple-500/12 text-purple-300 ring-purple-400/25",
   emerald: "bg-emerald-400/10 text-emerald-300 ring-emerald-400/20",
   amber: "bg-amber-400/10 text-amber-300 ring-amber-400/20",
   rose: "bg-rose-400/10 text-rose-300 ring-rose-400/20",
 };
-
+const Base_URL = import.meta.env.VITE_API_BASE_URL;
 const statusClasses = {
   Active: "bg-emerald-400/10 text-emerald-300 ring-emerald-400/20",
   Revoked: "bg-rose-400/10 text-rose-300 ring-rose-400/20",
@@ -69,7 +70,7 @@ function UsageChart({ values }) {
   );
 }
 
-function KeyCard({ apiKey,revokeKey }) {
+function KeyCard({ apiKey, onRevokeRequest }) {
   return (
     <article className="rounded-lg border border-[#20202a] bg-[#0b0b12] p-6 shadow-2xl shadow-black/10 transition hover:border-purple-400/25 hover:bg-[#101018]">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -96,9 +97,7 @@ function KeyCard({ apiKey,revokeKey }) {
 
         {apiKey.isActive && (
           <button
-            onClick={() => {
-              revokeKey(apiKey._id);
-            }}
+            onClick={() => onRevokeRequest(apiKey)}
             type="button"
             className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-rose-400/30 px-3 text-sm font-semibold text-rose-300 transition hover:bg-rose-400/10"
         >
@@ -143,7 +142,7 @@ function GenerateKeyModal({ onClose, setLoader, fetchApiKeys, fetchlogs, setKeyD
   const [apiKeyTier, setApiKeyTier] = useState("Starter");
   const handleGenerate = async () => {
     try {
-      const response = await axios.post("http://localhost:3000/create-api-key", {
+      const response = await axios.post(`${Base_URL}/create-api-key`, {
         name: apiKeyName,
         tier: apiKeyTier
       },{
@@ -305,9 +304,10 @@ export default function ApiKeys() {
   const [apiKeys, setApiKeys] = useState([]);
   const [apiLogs, setApiLogs] = useState([]);
   const [keyDisplay, setKeyDisplay] = useState(null);
+  const [pendingRevokeKey, setPendingRevokeKey] = useState(null);
   const fetchApiKeys = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api-keys", {
+      const response = await axios.get(`${Base_URL}/api-keys`, {
         withCredentials: true,
       });
       console.log("Fetched API keys:", response.data);
@@ -319,7 +319,7 @@ export default function ApiKeys() {
   };
   const fetchlogs= async()=>{
     try {
-      const response = await axios.get("http://localhost:3000/userLogs", {
+      const response = await axios.get(`${Base_URL}/userLogs`, {
         withCredentials: true,
       });
       console.log("Fetched API logs:", response.data);
@@ -331,7 +331,7 @@ export default function ApiKeys() {
   };
   const revokeKey = async (keyId) => {
     try {
-      await axios.post("http://localhost:3000/revoke-api-key", { keyId }, {
+      await axios.post(`${Base_URL}/revoke-api-key`, { keyId }, {
         withCredentials: true,
       });
       setLoader(true);
@@ -379,7 +379,7 @@ export default function ApiKeys() {
 
         <section className="grid gap-5 2xl:grid-cols-2">
           {apiKeys.map((apiKey) => (
-            <KeyCard key={apiKey._id} apiKey={apiKey} revokeKey={revokeKey} />
+            <KeyCard key={apiKey._id} apiKey={apiKey} onRevokeRequest={setPendingRevokeKey} />
           ))}
         </section>
 
@@ -387,6 +387,17 @@ export default function ApiKeys() {
       </section>
 
       {generateOpen && <GenerateKeyModal onClose={() => setGenerateOpen(false)} setLoader={setLoader} fetchApiKeys={fetchApiKeys} fetchlogs={fetchlogs} setKeyDisplay={setKeyDisplay} />}
+      {pendingRevokeKey && (
+        <ApiKeyRevokeConfirmation
+          apiKey={pendingRevokeKey}
+          onCancel={() => setPendingRevokeKey(null)}
+          onConfirm={async () => {
+            const keyId = pendingRevokeKey._id;
+            setPendingRevokeKey(null);
+            await revokeKey(keyId);
+          }}
+        />
+      )}
     </main>
   );
 }

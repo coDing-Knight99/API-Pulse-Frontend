@@ -14,22 +14,24 @@ import Loader from "../components/Loader";
 import RegisterService from "./RegisterService";
 import EditService from "./EditService";
 import Navbar from "../components/Navbar";
+import ServiceDeleteConfirm from "../components/ServiceDeleteConfirm";
 const statusStyles = {
   true: "bg-emerald-400/10 text-emerald-300 ring-emerald-400/20",
   false: "bg-rose-400/10 text-rose-300 ring-rose-400/20",
 };
-
+const Base_URL = import.meta.env.VITE_API_BASE_URL;
 function ServiceCard({ setLoader,setEditService,fetchServices,Services }) {
   const navigate = useNavigate();
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const deleteService = async() =>{
     try{
       setLoader(true);
       console.log("Deleting service with ID:", Services._id);
-      await axios.post("http://localhost:3000/delete-service",{serviceId: Services._id},{
+      await axios.post(`${Base_URL}/delete-service`,{serviceId: Services._id},{
         withCredentials: true,
       })
       setLoader(true);
-      fetchServices();
+      await fetchServices();
       setLoader(false);
     }catch(error)
     {
@@ -39,6 +41,16 @@ function ServiceCard({ setLoader,setEditService,fetchServices,Services }) {
   return (
     <article className="rounded-lg border border-[#20202a] bg-[#0b0b12] p-6 shadow-2xl shadow-black/10 transition hover:border-purple-400/25 hover:bg-[#101018]">
         <ToastContainer/>
+      {deleteConfirmOpen && (
+        <ServiceDeleteConfirm
+          service={Services}
+          onCancel={() => setDeleteConfirmOpen(false)}
+          onConfirm={async () => {
+            setDeleteConfirmOpen(false);
+            await deleteService();
+          }}
+        />
+      )}
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
@@ -71,7 +83,7 @@ function ServiceCard({ setLoader,setEditService,fetchServices,Services }) {
             <Edit3 size={16} />
           </button>
           <button
-            onClick={deleteService}
+            onClick={() => setDeleteConfirmOpen(true)}
             type="button"
             aria-label={`Delete ${Services.service_name}`}
             className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#20202a] text-slate-400 transition hover:border-rose-400/40 hover:bg-rose-400/10 hover:text-rose-300"
@@ -208,10 +220,10 @@ export default function Service() {
     await Promise.resolve();
     try {
       setloader(true);
-      const response = await axios.get("http://localhost:3000/services",{
+      const response = await axios.get(`${Base_URL}/services`,{
         withCredentials: true,
       });
-      const logsResponse = await axios.get("http://localhost:3000/userLogs",{
+      const logsResponse = await axios.get(`${Base_URL}/userLogs`,{
         withCredentials: true,
       });
       setloader(false);

@@ -14,7 +14,7 @@ import {
   Server,
   X,
 } from "lucide-react";
-
+const Base_URL = import.meta.env.VITE_API_BASE_URL;
 import axios from "axios";
 const navItems = [
   { label: "Dashboard", route: "/", icon: Gauge, eyebrow: "Overview" },
@@ -86,9 +86,11 @@ function NavItem({ item, active, onNavigate }) {
 
 function SidebarContent({ pathname, onNavigate }) {
   const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const logout = () => {
     try{
-      const response = axios.post("http://localhost:3000/logout",{},{
+      const response = axios.post(`${Base_URL}/logout`,{},{
         withCredentials: true,
       });
       console.log(response);
@@ -100,6 +102,23 @@ function SidebarContent({ pathname, onNavigate }) {
       toast("Logout failed",{className:"font-bold text-lg"});
     }
   }
+  const userdata= async () => {
+    try{
+      const response = await axios.get(`${Base_URL}/userdata`,{
+        withCredentials: true,
+      });
+      console.log(response);
+      setUsername(response.data.username);
+      setEmail(response.data.email);
+    }catch(error)
+    {
+      console.error("Error fetching user data:", error);
+    }
+  }
+
+  useEffect(() => {
+    userdata();
+  }, [username,email]);
   return (
     <div className="flex h-full flex-col bg-[#050508]">
       
@@ -125,11 +144,11 @@ function SidebarContent({ pathname, onNavigate }) {
         <div className="rounded-lg border border-[#20202a] bg-[#0b0b12] p-3">
           <div className="flex items-center gap-3">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-500 text-sm font-bold text-white">
-              D
+              {username.charAt(0).toUpperCase()}
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-semibold text-white">Dhruv</span>
-              <span className="block truncate text-xs text-slate-500">Account</span>
+              <span className="block truncate text-sm font-semibold text-white">{username}</span>
+              <span className="block truncate text-xs text-slate-500">{email}</span>
             </span>
           </div>
 

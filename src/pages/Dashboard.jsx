@@ -15,6 +15,8 @@ import { useEffect, useState } from "react";
 import RequestsChart from "../components/RequestsChart.jsx";
 import StatusCodePieChart from "../components/StatusPieChart.jsx";
 import Navbar from "../components/Navbar.jsx";
+
+const Base_URL = import.meta.env.VITE_API_BASE_URL;
 const metrics = [
   {
     label: "Total Requests",
@@ -189,7 +191,7 @@ export default function Dashboard() {
 useEffect(()=> {
   const fetchUserMetrics = async () => {
   try {
-    const response = await axios.get(`http://localhost:3000/metrics/user`,{
+    const response = await axios.get(`${Base_URL}/metrics/user`,{
       withCredentials: true
     });
     // Update state with real metrics data
@@ -205,7 +207,7 @@ useEffect(()=> {
       setRateLimits(response.data.userGlobal.rateLimited);
     }
     console.log("Fetched user metrics:", response.data);
-    const hourlyData = await axios.get(`http://localhost:3000/metrics/userhourlyrequests`,{
+    const hourlyData = await axios.get(`${Base_URL}/metrics/userhourlyrequests`,{
       withCredentials: true
     });
     setHourlyRequests(hourlyData.data);

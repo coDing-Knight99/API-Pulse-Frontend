@@ -9,7 +9,7 @@ const methodClasses = {
   PATCH: "bg-amber-400/10 text-amber-300 ring-amber-400/20",
   DELETE: "bg-rose-400/10 text-rose-300 ring-rose-400/20",
 };
-
+const BASE_URL = import.meta.env.BASE_URL;
 export default function ApiSandboxRequestBuilder({
   method,
   setMethod,
@@ -55,6 +55,7 @@ export default function ApiSandboxRequestBuilder({
     setQueryParams((currentParams) => currentParams.filter((_, paramIndex) => paramIndex !== index));
   }
 
+  
   return (
     <section className="rounded-lg border border-[#20202a] bg-[#0b0b12] p-5 shadow-2xl shadow-black/10 sm:p-6">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-end">

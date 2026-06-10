@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Power, Server, XIcon } from 'lucide-react';
 import axios from 'axios';
 import { toast,ToastContainer } from 'react-toastify';
+const Base_URL = import.meta.env.VITE_API_BASE_URL;
 const EditService = ({ service, setEditService, setloader, fetchServices }) => {
     const [serviceName, setserviceName] = useState(service?.service_name || '');
     const [url, seturl] = useState(service?.url || '');
@@ -12,7 +13,7 @@ const EditService = ({ service, setEditService, setloader, fetchServices }) => {
     const isFormValid = serviceName.trim()!='' && url.trim()!='';
     const handleAdd = async()=>{
         try{
-            const res = await axios.post("http://localhost:3000/edit-service",{serviceId: service?._id, service_name: serviceName, url: url, isActive: isActive },{
+            const res = await axios.post(`${Base_URL}/edit-service`,{serviceId: service?._id, service_name: serviceName, url: url, isActive: isActive },{
                 withCredentials: true,
             })
             toast("Service Edited Successfully!",{className:"font-bold text-lg"})
@@ -34,7 +35,7 @@ const EditService = ({ service, setEditService, setloader, fetchServices }) => {
           document.body.classList.remove("overflow-hidden")
         }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 px-4 py-6 backdrop-blur-sm">
       <div onClick={(e)=>{e.stopPropagation()}} className="max-h-[88vh] w-full max-w-2xl overflow-y-auto rounded-lg border border-[#20202a] bg-[#0b0b12] p-6 shadow-2xl shadow-black/60 sm:p-8">
-        <ToastContaine  r/>
+        <ToastContainer/>
         <div className='flex items-start justify-between gap-4'>
         <div className='pb-8'>
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-purple-500/15 text-purple-300 ring-1 ring-purple-400/25">

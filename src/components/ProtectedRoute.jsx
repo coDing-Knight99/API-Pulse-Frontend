@@ -6,10 +6,13 @@ import Loader from './Loader'
 const ProtectedRoute = ({children}) => {
     const [isLoading, setisLoading] = useState(true);
     const [isAuthenticated, setisAuthenticated] = useState(false);
+    const BASE_URL=import.meta.env.VITE_API_BASE_URL;
     useEffect(() => {
         const checkValid=async()=>{
             try{
-                const res = await axios("http://localhost:3000/loginstatus");
+                const res = await axios(`${BASE_URL}/loginstatus`,{
+                    withCredentials:true,
+                });
                 setisAuthenticated(res.data.isLogin);
             }catch(error)
             {

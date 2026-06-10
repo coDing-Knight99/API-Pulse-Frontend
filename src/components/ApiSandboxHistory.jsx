@@ -7,6 +7,7 @@ const methodTone = {
   PATCH: "bg-amber-400/10 text-amber-300",
   DELETE: "bg-rose-400/10 text-rose-300",
 };
+const BASE_URL = import.meta.env.BASE_URL;
 
 export default function ApiSandboxHistory({ items, onSelect }) {
   return (

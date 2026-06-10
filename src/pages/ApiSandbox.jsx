@@ -15,6 +15,7 @@ export default function ApiSandbox() {
   const [history, setHistory] = useState([]);
   const [response, setResponse] = useState([]);
   const [loader, setLoader] = useState(false);
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL; 
   const buildRequestUrl = () => {
     const activeParams = queryParams.filter((param) => param.key.trim());
 
@@ -46,7 +47,7 @@ export default function ApiSandbox() {
         }
       }
       const ServerResponse = await axios.post(
-        "http://localhost:3000/sandbox",
+        `${BASE_URL}/sandbox`,
         {
           method,
           url: requestUrl,
@@ -100,7 +101,7 @@ export default function ApiSandbox() {
 
   const getRequestHistory = async () => {
     try {
-      const historyResponse = await axios.get('http://localhost:3000/sandbox/recent-requests', {
+      const historyResponse = await axios.get(`${BASE_URL}/sandbox/recent-requests`, {
         withCredentials: true,
       });
       console.log("history", historyResponse);

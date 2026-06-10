@@ -1,5 +1,5 @@
 import { Braces, Clock3, Copy, Gauge } from "lucide-react";
-
+import {toast, ToastContainer} from "react-toastify";
 function highlightedJson(value) {
   console.log(value);
   return JSON.stringify(value, null, 2)
@@ -31,6 +31,17 @@ function highlightedJson(value) {
     ));
 }
 
+const CopyToClipboard = (text) => {
+  navigator.clipboard.writeText(text)
+    .then(() => {
+      toast("Response JSON copied to clipboard!", { className: "font-bold text-lg" });
+    })
+    .catch((err) => {
+      console.error("Failed to copy text: ", err);
+      toast("Failed to copy JSON", { className: "font-bold text-lg" });
+    });
+}
+
 export default function ApiSandboxResponseViewer({ response }) {
   const statusTone =
     response.status >= 500
@@ -41,6 +52,7 @@ export default function ApiSandboxResponseViewer({ response }) {
 console.log(response);
   return (
     <section className="rounded-lg border border-[#20202a] bg-[#0b0b12] p-5 shadow-2xl shadow-black/10 sm:p-6">
+        <ToastContainer/>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-semibold uppercase tracking-wide text-purple-300">Response</p>
@@ -48,6 +60,7 @@ console.log(response);
         </div>
         <button
           type="button"
+          onClick={() => CopyToClipboard(JSON.stringify(response.data?.data || {}))}
           className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[#20202a] px-3 text-sm font-semibold text-slate-300 transition hover:bg-[#151521] hover:text-white"
         >
           <Copy size={16} />

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Server, XIcon } from 'lucide-react';
 import axios from 'axios';
 import { toast ,ToastContainer} from 'react-toastify';
+const Base_URL = import.meta.env.VITE_API_BASE_URL;
 const RegisterService = ({ setaddService, setloader, fetchServices }) => {
     const [serviceName, setserviceName] = useState('');
     const [url, seturl] = useState('');
@@ -11,7 +12,7 @@ const RegisterService = ({ setaddService, setloader, fetchServices }) => {
     const isFormValid = serviceName.trim()!='' && url.trim()!='';
     const handleAdd = async()=>{
         try{
-            const res = await axios.post("http://localhost:3000/register-service",{service_name: serviceName, url: url},{
+            const res = await axios.post(`${Base_URL}/register-service`,{service_name: serviceName, url: url},{
                 withCredentials: true,
             })
             toast("Service Added Successfully!",{className:"font-bold text-lg"})

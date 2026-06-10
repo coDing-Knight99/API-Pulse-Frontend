@@ -27,6 +27,8 @@
     YAxis,
   } from "recharts";
 
+
+  const Base_URL = import.meta.env.VITE_API_BASE_URL;
   const statusFamilyColors = {
     "2xx": "#22c55e",
     "3xx": "#38bdf8",
@@ -171,16 +173,16 @@
         setLoader(true);
 
         try {
-          const metricsResponse = await axios.get('http://localhost:3000/metrics/service/' + serviceId, {
+          const metricsResponse = await axios.get(`${Base_URL}/metrics/service/${serviceId}`, {
               withCredentials: true,
             });
-            const hourlyResponse = await   axios.get('http://localhost:3000/metrics/servicehourlyrequests/' + serviceId, {
+            const hourlyResponse = await   axios.get(`${Base_URL}/metrics/servicehourlyrequests/${serviceId}`, {
               withCredentials: true,
             });
-            const logsResponse = await axios.get('http://localhost:3000/serviceLogs/' + serviceId, {
+            const logsResponse = await axios.get(`${Base_URL}/serviceLogs/${serviceId}`, {
               withCredentials: true,
             });
-            const dailyMetricsResponse = await axios.get('http://localhost:3000/metrics/servicedailymetrics/'+serviceId,{
+            const dailyMetricsResponse = await axios.get(`${Base_URL}/metrics/servicedailymetrics/${serviceId}`, {
               withCredentials:true,
             });
             console.log("Service Metrics:", metricsResponse.data);

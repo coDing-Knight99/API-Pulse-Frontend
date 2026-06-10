@@ -4,6 +4,8 @@ import { toast } from "react-toastify";
 import Loader from "../components/Loader";
 import { ToastContainer } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+const Base_URL = import.meta.env.VITE_API_BASE_URL;
+
 const Login = () => {
   const [loader, setloader] = useState(false)
   const [isLogin, setIsLogin] = useState(true);
@@ -17,7 +19,7 @@ const Login = () => {
     console.log({username,email,password});
     try{
         setloader(true);
-        const res=await axios.post("http://localhost:3000/register",{username,email,password},{
+        const res=await axios.post(`${Base_URL}/register`,{username,email,password},{
           withCredentials: true,
         });
         document.getElementById("username").value='';
@@ -31,7 +33,7 @@ const Login = () => {
         if(res.status==201)
         {
           try{
-            const resLog = await axios.post("http://localhost:3000/login",{username,email,password},{
+            const resLog = await axios.post(`${Base_URL}/login`,{username,email,password},{
               withCredentials: true,
             });
             toast(resLog.data.message,{className:"font-bold text-lg background-black text-white"});
@@ -59,7 +61,7 @@ const handleLogin = async function(){
   console.log({emaillog,passwordlog});
   try{
     setloader(true);
-    const res = await axios.post("http://localhost:3000/login",{email:emaillog,password:passwordlog},{
+    const res = await axios.post(`${Base_URL}/login`,{email:emaillog,password:passwordlog},{
       withCredentials:true
     });
     document.getElementById("emaillog").value='';
