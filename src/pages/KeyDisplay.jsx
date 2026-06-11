@@ -56,6 +56,9 @@ const KeyDisplay = ({ apikey, setKeyDisplay }) => {
                     <div className="rounded-lg border border-amber-400/20 bg-amber-400/10 p-4">
                         <p className="text-sm font-semibold text-amber-300">Header usage</p>
                         <p className="mt-2 text-sm leading-6 text-slate-300">
+                            Access service using gateway url https://api-pulse-0fic.onrender.com/service/ + your-service-name + / + your-endpoint
+                        </p>
+                        <p className="mt-2 text-sm leading-6 text-slate-300">
                             Send it with requests using the <span className="font-semibold text-white">x-api-key</span> header.
                         </p>
                     </div>
