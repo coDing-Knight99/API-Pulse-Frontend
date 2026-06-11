@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Zap,
 } from "lucide-react";
+import {FaGithub} from "react-icons/fa";
 import { Link } from "react-router-dom";
 import logo from "../assets/APIPulse.png";
 import heroGraphic from "../assets/hero.png";
@@ -282,7 +283,7 @@ export default function   LandingPage() {
       <footer className="border-t border-white/10 bg-[#08080d]">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-4 px-5 py-6 text-sm text-slate-400 sm:flex-row sm:px-8 lg:px-10">
           <p>
-            Built by <span className="font-semibold text-slate-200">coDing-Knight99</span>
+            Built by <span className="font-semibold text-slate-200">Dhruv Kanojia</span>
           </p>
           <a
             href="https://github.com/coDing-Knight99"
@@ -291,6 +292,7 @@ export default function   LandingPage() {
             className="inline-flex h-10 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-4 font-semibold text-slate-200 transition hover:border-purple-300/30 hover:bg-purple-500/10 hover:text-white"
             aria-label="Open coDing-Knight99 on GitHub"
           >
+            <FaGithub size={18} />
           </a>
         </div>
       </footer>
