@@ -13,7 +13,9 @@ const ProtectedRoute = ({children}) => {
                 const res = await axios(`${BASE_URL}/loginstatus`,{
                     withCredentials:true,
                 });
+                csonsole.log("Login status response:", res.data);
                 isAuthenticated = res.data.isLogin;
+                console.log("User is authenticated:", isAuthenticated);
             }catch(error)
             {
                 console.error("Error checking login status",error);
