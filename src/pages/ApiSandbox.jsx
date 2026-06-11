@@ -16,6 +16,7 @@ export default function ApiSandbox() {
   const [response, setResponse] = useState([]);
   const [loader, setLoader] = useState(false);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL; 
+  const [sendingRequest,setSendingRequest] = useState(false);
   const buildRequestUrl = () => {
     const activeParams = queryParams.filter((param) => param.key.trim());
 
@@ -34,7 +35,7 @@ export default function ApiSandbox() {
   const handleSendRequest = async () => {
     try {
       const requestUrl = buildRequestUrl();
-      setLoader(true);
+      setSendingRequest(true);
       let parsedBody;
 
       if (body.trim() !== "") {
@@ -42,7 +43,7 @@ export default function ApiSandbox() {
           parsedBody = JSON.parse(body);
         } catch (error) {
           toast.error("Invalid JSON in request body");
-          setLoader(false);
+          setSendingRequest(false);
           return;
         }
       }
@@ -70,7 +71,7 @@ export default function ApiSandbox() {
       ).toFixed(3)} KB`;
 
       setResponse(ServerResponse);
-      setLoader(false);
+      setSendingRequest(false);
     } catch (error) {
       console.log(error.response);
 
@@ -88,7 +89,7 @@ export default function ApiSandbox() {
           },
         });
       }
-      setLoader(false);
+      setSendingRequest(false);
       toast.error("Request failed");
     }
   };
@@ -148,7 +149,7 @@ export default function ApiSandbox() {
           />
 
           <div className="xl:sticky xl:top-7">
-            <ApiSandboxResponseViewer response={response} />
+            <ApiSandboxResponseViewer response={response} loader={sendingRequest}/>
           </div>
         </div>
 

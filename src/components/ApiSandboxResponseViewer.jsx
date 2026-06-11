@@ -1,5 +1,6 @@
 import { Braces, Clock3, Copy, Gauge } from "lucide-react";
 import {toast, ToastContainer} from "react-toastify";
+import Loader from "./Loader";
 function highlightedJson(value) {
   console.log(value);
   return JSON.stringify(value, null, 2)
@@ -42,7 +43,7 @@ const CopyToClipboard = (text) => {
     });
 }
 
-export default function ApiSandboxResponseViewer({ response }) {
+export default function ApiSandboxResponseViewer({ response, loader}) {
   const statusTone =
     response.status >= 500
       ? "bg-rose-400/10 text-rose-300 ring-rose-400/20"
@@ -51,8 +52,11 @@ export default function ApiSandboxResponseViewer({ response }) {
         : "bg-emerald-400/10 text-emerald-300 ring-emerald-400/20";
 console.log(response);
   return (
-    <section className="rounded-lg border border-[#20202a] bg-[#0b0b12] p-5 shadow-2xl shadow-black/10 sm:p-6">
+    <section className="relative overflow-hidden rounded-lg border border-[#20202a] bg-[#0b0b12] p-5 shadow-2xl shadow-black/10 sm:p-6">
         <ToastContainer/>
+        {
+          loader && (<Loader contained label="Sending request" />)
+        }
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-semibold uppercase tracking-wide text-purple-300">Response</p>
