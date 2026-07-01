@@ -33,7 +33,7 @@ const Login = () => {
         if(res.status==201)
         {
           try{
-            const resLog = await axios.post(`${Base_URL}/login`,{username,email,password},{
+            const resLog = await axios.post(`${Base_URL}/login`,{email,password},{
               withCredentials: true,
             });
             toast(resLog.data.message,{className:"font-bold text-lg background-black text-white"});
