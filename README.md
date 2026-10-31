@@ -37,7 +37,7 @@ VITE_API_BASE_URL=http://localhost:3000
 
 Replace the example URL with the address of your backend. Vite exposes `VITE_` variables to browser code, so do not put passwords, private keys, or other secrets in this file. Restart the development server after changing environment variables.
 
-The frontend sends Axios requests with credentials enabled for login sessions and other authenticated API calls.
+The frontend sends Axios requests with credentials enabled for login sessions and other authenticated API calls. Configure the backend's CORS policy to allow the frontend origin and credentialed requests.
 
 ## Run locally
 
@@ -67,7 +67,7 @@ Open the local URL printed by Vite (normally `http://localhost:5173`). Sign in o
 | `/login` | Sign in and registration | Public |
 | `/` | Dashboard overview | Protected |
 | `/services` | Service management | Protected |
-| `/services/:serviceId/analytics` | Service analytics and logs | Protected |
+| `/services/:serviceId/analytics` | Service analytics and logs; the route value is the service name | Protected |
 | `/api-keys` | API-key management and recent logs | Protected |
 | `/api-keys/:keyId/analytics` | API-key analytics and logs | Protected |
 | `/api-sandbox` | Request sandbox and history | Protected |
@@ -83,8 +83,8 @@ docker build -t api-pulse-frontend .
 docker run --rm -p 5173:80 api-pulse-frontend
 ```
 
-Open `http://localhost:5173`. Vite environment variables are embedded during the build, so provide `VITE_API_BASE_URL` as a Docker build argument/environment value available to the build, or configure the deployment build environment before building the image. The frontend must be able to reach the configured backend URL from the user's browser.
+Open `http://localhost:5173`. Vite embeds `VITE_API_BASE_URL` into the static files during `npm run build`. Set it in a root `.env` file included in the Docker build context, or in the build environment used by your deployment platform. Changing a container runtime environment variable alone will not change the already-built frontend. The configured backend URL must be reachable from the user's browser.
 
 ## Backend integration
 
-The UI calls the backend base URL configured by `VITE_API_BASE_URL`. The code uses routes for authentication (`/register`, `/login`, `/loginstatus`, `/refreshTokens`, `/logout`, `/userdata`), service management (`/services`, `/register-service`, `/edit-service`, `/delete-service`), API keys (`/api-keys`, `/create-api-key`, `/revoke-api-key`), metrics and logs, and sandbox requests (`/sandbox`, `/sandbox/recent-requests`). The backend is not included in this repository.
+The UI calls the backend base URL configured by `VITE_API_BASE_URL`. It uses routes for authentication (`/register`, `/login`, `/loginstatus`, `/refreshTokens`, `/logout`, `/userdata`), service management (`/services`, `/register-service`, `/edit-service`, `/delete-service`), API keys (`/api-keys`, `/create-api-key`, `/revoke-api-key`), analytics (`/metrics/user`, `/metrics/userhourlyrequests`, service and key metric routes), request logs (`/userLogs`, `/serviceLogs/:serviceName`, `/apikeyLogs/:keyId`), and sandbox requests (`/sandbox`, `/sandbox/recent-requests`). The backend is not included in this repository.
